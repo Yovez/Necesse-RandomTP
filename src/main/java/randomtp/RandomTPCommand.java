@@ -22,41 +22,47 @@ public class RandomTPCommand extends ModularChatCommand {
     private final List<Long> confirmation;
     // Could use the sicknessTime in placement of this entirely, but would make it so can't teleport using scrolls or any other way for a while.
     // First Long is serverClient authentication
-    // Second Long is System.getTimeInMillis + 1000 x 30
-    // 30 second cooldown
+    // Second Long is System.getTimeInMillis + 1000 x cooldown (default is 30)
     private final Map<Long, Long> cooldown;
 
     public RandomTPCommand() {
-        super("randomtp", Localization.translate("randomtp", "commandDescription"), PermissionLevel.USER, false, new CmdParameter[0]);
+        super("randomtp", Localization.translate("randomtp", "commandDescription"), PermissionLevel.valueOf(RandomTP.permissionLevel), false, new CmdParameter[0]);
         confirmation = new ArrayList();
         cooldown = new HashMap();
     }
 
     @Override
     public void runModular(Client client, Server server, ServerClient serverClient, Object[] args, String[] errors, CommandLog log) {
-        // When player runs command, adds to confirmation list
-        if (cooldown.containsKey(serverClient.authentication)) {
-            // If current time is greater than last ran time + 30 seconds
-            if (System.currentTimeMillis() >= cooldown.get(serverClient.authentication)) {
-                // remove from cooldown
-                cooldown.remove(serverClient.authentication);
-            } else {
-                // Else they need to wait
-                log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportCooldown", "seconds", ((cooldown.get(serverClient.authentication) - System.currentTimeMillis()) / 1000)), serverClient);
-                return;
-            }
-        }
-        if (!confirmation.contains(serverClient.authentication)) {
-            confirmation.add(serverClient.authentication);
-            log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportConfirmation"), serverClient);
-            log.addClient(GameColor.PURPLE.getColorCode() + Localization.translate("randomtp", "teleportConfirmation2"), serverClient);
+        if (serverClient == null) {
+            System.out.println("This command can't be run through console.");
             return;
         }
+        // When player runs command, adds to confirmation list
+        if (RandomTP.cooldown > 0)
+            if (cooldown.containsKey(serverClient.authentication)) {
+                // If current time is greater than last ran time + cooldnwo (default is 30)
+                if (System.currentTimeMillis() >= cooldown.get(serverClient.authentication)) {
+                    // remove from cooldown
+                    cooldown.remove(serverClient.authentication);
+                } else {
+                    // Else they need to wait
+                    log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportCooldown", "seconds", ((cooldown.get(serverClient.authentication) - System.currentTimeMillis()) / 1000)), serverClient);
+                    return;
+                }
+            }
+        if (RandomTP.confirmation)
+            if (!confirmation.contains(serverClient.authentication)) {
+                confirmation.add(serverClient.authentication);
+                log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportConfirmation"), serverClient);
+                log.addClient(GameColor.PURPLE.getColorCode() + Localization.translate("randomtp", "teleportConfirmation2"), serverClient);
+                return;
+            }
         // When player runs command again removes them from list then executes code as normal
-        confirmation.remove(serverClient.authentication);
+        if (RandomTP.confirmation)
+            confirmation.remove(serverClient.authentication);
         // Random X & Y Level coords between -20000 and 20000 for each
-        final int randomX = new Random().nextInt(-20000, 20000);
-        final int randomY = new Random().nextInt(-20000, 20000);
+        final int randomX = new Random().nextInt(RandomTP.minX, RandomTP.maxX);
+        final int randomY = new Random().nextInt(RandomTP.minY, RandomTP.maxY);
         // If level doesn't exist (probably won't) then generate the level
         if (server.world.levelManager.getLevel(new LevelIdentifier(randomX, randomY, 0)) == null) {
             server.world.generateNewLevel(randomX, randomY, 0);
@@ -67,6 +73,7 @@ public class RandomTPCommand extends ModularChatCommand {
             serverClient.getLevel().entityManager.addLevelEventHidden(e);
         }
         log.addClient(GameColor.GREEN.getColorCode() + Localization.translate("randomtp", "teleportMessage", "level", level.getIdentifier().stringID), serverClient);
-        cooldown.put(serverClient.authentication, System.currentTimeMillis() + (1000 * 30));
+        if (RandomTP.cooldown > 0)
+            cooldown.put(serverClient.authentication, System.currentTimeMillis() + (1000 * RandomTP.cooldown));
     }
 }
