@@ -1,4 +1,4 @@
-Teleport to a Random Island!
+**Teleport to a Random Island!**
 
 Very small mod to randomly teleport to other islands. Completely server side! Only the server/host needs this mod, other player's don't need to do anything!
 
@@ -15,7 +15,7 @@ Features:
 - Completely server side! Only the server/host needs this mod, other player's don't need to do anything!
 
 Default Settings:
-
+```
 RANDOMTP = {
   confirmation = true, // True/False to confirm when using RandomTP.
   cooldown = 30, // Amount in seconds for cooldown to use RandomTP again. Set to 0 for no cooldown.
@@ -25,6 +25,7 @@ RANDOMTP = {
   max_X = 20000, // Maximum X value to randomly pick from. Needs to be greater than min_X
   max_Y = 20000 // Maximum Y value to randomly pick from. Needs to be greater than min_Y
 }
+```
 
 Want to contribute to the project? Have an issue? Maybe make a fork? Or request a feature?
 Check it out on Github: https://github.com/Yovez/RandomTP
