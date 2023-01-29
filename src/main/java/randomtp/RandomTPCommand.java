@@ -4,6 +4,7 @@ import necesse.engine.commands.CmdParameter;
 import necesse.engine.commands.CommandLog;
 import necesse.engine.commands.ModularChatCommand;
 import necesse.engine.commands.PermissionLevel;
+import necesse.engine.localization.Localization;
 import necesse.engine.network.client.Client;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
@@ -14,13 +15,11 @@ import necesse.entity.levelEvent.TeleportEvent;
 import necesse.gfx.GameColor;
 import necesse.level.maps.Level;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class RandomTPCommand extends ModularChatCommand {
 
-    private final List confirmation;
+    private final List<Long> confirmation;
     // Could use the sicknessTime in placement of this entirely, but would make it so can't teleport using scrolls or any other way for a while.
     // First Long is serverClient authentication
     // Second Long is System.getTimeInMillis + 1000 x 30
@@ -28,8 +27,8 @@ public class RandomTPCommand extends ModularChatCommand {
     private final Map<Long, Long> cooldown;
 
     public RandomTPCommand() {
-        super("randomtp", "Teleport to a Random Island", PermissionLevel.USER, false, new CmdParameter[0]);
-        confirmation = new ArrayList<Long>();
+        super("randomtp", Localization.translate("randomtp", "commandDescription"), PermissionLevel.USER, false, new CmdParameter[0]);
+        confirmation = new ArrayList();
         cooldown = new HashMap();
     }
 
@@ -43,15 +42,14 @@ public class RandomTPCommand extends ModularChatCommand {
                 cooldown.remove(serverClient.authentication);
             } else {
                 // Else they need to wait
-                log.addClient(GameColor.RED.getColorCode() + "[RandomTP] You're on cooldown till the next teleport. " +
-                        "You need to wait " + ((cooldown.get(serverClient.authentication) - System.currentTimeMillis()) / 1000) + " more seconds.", serverClient);
+                log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportCooldown", "seconds", ((cooldown.get(serverClient.authentication) - System.currentTimeMillis()) / 1000)), serverClient);
                 return;
             }
         }
         if (!confirmation.contains(serverClient.authentication)) {
             confirmation.add(serverClient.authentication);
-            log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Confirmation Needed. You are about to randomly teleport to a different island, you'll likely spawn in the ocean. Be sure to have a boat handy!", serverClient);
-            log.addClient(GameColor.PURPLE.getColorCode() + "[RandomTP] Type this command again to confirm.", serverClient);
+            log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportConfirmation"), serverClient);
+            log.addClient(GameColor.PURPLE.getColorCode() + Localization.translate("randomtp", "teleportConfirmation2"), serverClient);
             return;
         }
         // When player runs command again removes them from list then executes code as normal
@@ -68,7 +66,7 @@ public class RandomTPCommand extends ModularChatCommand {
             LevelEvent e = new TeleportEvent(serverClient, 200, level.getIdentifier(), 10.0F, (newLevel) -> new TeleportResult(true, server.world.levelManager.getLevel(level.getIdentifier()).getWorldEntity().spawnTile));
             serverClient.getLevel().entityManager.addLevelEventHidden(e);
         }
-        log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Teleported to " + level.getIdentifier().stringID, serverClient);
+        log.addClient(GameColor.GREEN.getColorCode() + Localization.translate("randomtp", "teleportMessage", "level", level.getIdentifier().stringID), serverClient);
         cooldown.put(serverClient.authentication, System.currentTimeMillis() + (1000 * 30));
     }
 }
