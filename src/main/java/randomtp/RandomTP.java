@@ -3,6 +3,7 @@ package randomtp;
 import necesse.engine.commands.CommandsManager;
 import necesse.engine.commands.PermissionLevel;
 import necesse.engine.modLoader.annotations.ModEntry;
+import randomtp.commands.RandomTPCommand;
 
 @ModEntry
 public class RandomTP {

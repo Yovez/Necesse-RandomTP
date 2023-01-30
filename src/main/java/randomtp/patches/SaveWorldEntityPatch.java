@@ -1,9 +1,10 @@
-package randomtp;
+package randomtp.patches;
 
 import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.save.SaveData;
 import necesse.engine.world.WorldEntity;
 import net.bytebuddy.asm.Advice;
+import randomtp.RandomTP;
 
 @ModMethodPatch(target = WorldEntity.class, name = "getSave", arguments = {})
 public class SaveWorldEntityPatch {

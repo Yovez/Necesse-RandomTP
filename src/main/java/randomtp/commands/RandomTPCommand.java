@@ -1,6 +1,5 @@
-package randomtp;
+package randomtp.commands;
 
-import necesse.engine.commands.CmdParameter;
 import necesse.engine.commands.CommandLog;
 import necesse.engine.commands.ModularChatCommand;
 import necesse.engine.commands.PermissionLevel;
@@ -14,6 +13,7 @@ import necesse.entity.levelEvent.LevelEvent;
 import necesse.entity.levelEvent.TeleportEvent;
 import necesse.gfx.GameColor;
 import necesse.level.maps.Level;
+import randomtp.RandomTP;
 
 import java.awt.*;
 import java.util.List;
@@ -28,9 +28,9 @@ public class RandomTPCommand extends ModularChatCommand {
     private final Map<Long, Long> cooldown;
 
     public RandomTPCommand() {
-        super("randomtp", Localization.translate("randomtp", "commandDescription"), PermissionLevel.valueOf(RandomTP.permissionLevel), false, new CmdParameter[0]);
-        confirmation = new ArrayList();
-        cooldown = new HashMap();
+        super("randomtp", Localization.translate("randomtp", "commandDescription"), PermissionLevel.valueOf(RandomTP.permissionLevel), false);
+        confirmation = new ArrayList<>();
+        cooldown = new HashMap<>();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class RandomTPCommand extends ModularChatCommand {
         // When player runs command, adds to confirmation list
         if (RandomTP.cooldown > 0)
             if (cooldown.containsKey(serverClient.authentication)) {
-                // If current time is greater than last ran time + cooldnwo (default is 30)
+                // If current time is greater than last ran time + cooldown (default is 30)
                 if (System.currentTimeMillis() >= cooldown.get(serverClient.authentication)) {
                     // remove from cooldown
                     cooldown.remove(serverClient.authentication);
@@ -80,6 +80,6 @@ public class RandomTPCommand extends ModularChatCommand {
         }
         log.addClient(GameColor.GREEN.getColorCode() + Localization.translate("randomtp", "teleportMessage", "level", level.getIdentifier().stringID), serverClient);
         if (RandomTP.cooldown > 0)
-            cooldown.put(serverClient.authentication, System.currentTimeMillis() + (1000 * RandomTP.cooldown));
+            cooldown.put(serverClient.authentication, System.currentTimeMillis() + (1000L * RandomTP.cooldown));
     }
 }

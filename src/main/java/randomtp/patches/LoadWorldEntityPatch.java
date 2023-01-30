@@ -1,10 +1,11 @@
-package randomtp;
+package randomtp.patches;
 
 import necesse.engine.commands.PermissionLevel;
 import necesse.engine.modLoader.annotations.ModMethodPatch;
 import necesse.engine.save.LoadData;
 import necesse.engine.world.WorldEntity;
 import net.bytebuddy.asm.Advice;
+import randomtp.RandomTP;
 
 @ModMethodPatch(target = WorldEntity.class, name = "applyLoadData", arguments = {LoadData.class, boolean.class})
 public class LoadWorldEntityPatch {
