@@ -55,7 +55,8 @@ public class RandomTPCommand extends ModularChatCommand {
         if (RandomTP.confirmation)
             if (!confirmation.contains(serverClient.authentication)) {
                 confirmation.add(serverClient.authentication);
-                log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportConfirmation"), serverClient);
+                log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportConfirmation", "ocean",
+                        RandomTP.teleportToOcean ? Localization.translate("randomtp", "oceanMessage") : ""), serverClient);
                 log.addClient(GameColor.PURPLE.getColorCode() + Localization.translate("randomtp", "teleportConfirmation2"), serverClient);
                 return;
             }
