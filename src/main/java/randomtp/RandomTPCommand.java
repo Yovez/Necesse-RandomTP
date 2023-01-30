@@ -15,6 +15,8 @@ import necesse.entity.levelEvent.TeleportEvent;
 import necesse.gfx.GameColor;
 import necesse.level.maps.Level;
 
+import java.awt.*;
+import java.util.List;
 import java.util.*;
 
 public class RandomTPCommand extends ModularChatCommand {
@@ -69,7 +71,10 @@ public class RandomTPCommand extends ModularChatCommand {
         }
         final Level level = server.world.levelManager.getLevel(new LevelIdentifier(randomX, randomY, 0));
         if (serverClient.getLevel().isServerLevel()) {
-            LevelEvent e = new TeleportEvent(serverClient, 200, level.getIdentifier(), 10.0F, (newLevel) -> new TeleportResult(true, server.world.levelManager.getLevel(level.getIdentifier()).getWorldEntity().spawnTile));
+            LevelEvent e = new TeleportEvent(serverClient, 200, level.getIdentifier(), 10.0F, (newLevel) -> new TeleportResult(true,
+                    RandomTP.teleportToOcean ? new Point(server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.x,
+                            server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.y) : new Point(server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.x * 32 + 16,
+                            server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.y * 32 + 16)));
             serverClient.getLevel().entityManager.addLevelEventHidden(e);
         }
         log.addClient(GameColor.GREEN.getColorCode() + Localization.translate("randomtp", "teleportMessage", "level", level.getIdentifier().stringID), serverClient);

@@ -8,6 +8,7 @@ import necesse.engine.modLoader.annotations.ModEntry;
 public class RandomTP {
 
     public static boolean confirmation = true;
+    public static boolean teleportToOcean = false;
     public static String permissionLevel = PermissionLevel.USER.name();
     public static int cooldown = 30;
     public static int minX = -20000;

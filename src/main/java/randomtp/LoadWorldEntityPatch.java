@@ -18,6 +18,7 @@ public class LoadWorldEntityPatch {
                 System.out.println("[RandomTP] Invalid permission level set. Current permission level \"" + RandomTP.permissionLevel + "\" isn't valid! Please see the config for valid options!");
             } else {
                 RandomTP.confirmation = newLoadData.getBoolean("confirmation", true);
+                RandomTP.teleportToOcean = newLoadData.getBoolean("teleport_to_ocean", false);
                 RandomTP.cooldown = newLoadData.getInt("cooldown", 30);
                 RandomTP.permissionLevel = newLoadData.getUnsafeString("permission_level", "USER");
                 RandomTP.minX = newLoadData.getInt("min_X", -20000);
