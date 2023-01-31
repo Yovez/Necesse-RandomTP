@@ -1,8 +1,11 @@
 package randomtp.commands;
 
+import necesse.engine.commands.CmdParameter;
 import necesse.engine.commands.CommandLog;
 import necesse.engine.commands.ModularChatCommand;
 import necesse.engine.commands.PermissionLevel;
+import necesse.engine.commands.parameterHandlers.PresetStringParameterHandler;
+import necesse.engine.commands.parameterHandlers.StringParameterHandler;
 import necesse.engine.localization.Localization;
 import necesse.engine.network.client.Client;
 import necesse.engine.network.server.Server;
@@ -28,7 +31,9 @@ public class RandomTPCommand extends ModularChatCommand {
     private final Map<Long, Long> cooldown;
 
     public RandomTPCommand() {
-        super("randomtp", Localization.translate("randomtp", "commandDescription"), PermissionLevel.valueOf(RandomTP.permissionLevel), false);
+        super("randomtp", Localization.translate("randomtp", "commandDescription"), PermissionLevel.valueOf(RandomTP.permissionLevel.toUpperCase()), false,
+                new CmdParameter("setting", new PresetStringParameterHandler("confirmation", "teleport_to_ocean", "permissionLevel", "cooldown", "min_x", "min_y", "max_x", "max_y"), true, false),
+                new CmdParameter("value", new StringParameterHandler(), true, false));
         confirmation = new ArrayList<>();
         cooldown = new HashMap<>();
     }
@@ -39,7 +44,109 @@ public class RandomTPCommand extends ModularChatCommand {
             System.out.println("This command can't be run through console.");
             return;
         }
-        // When player runs command, adds to confirmation list
+        args:
+        if (args.length > 0) {
+            String setting = (String) args[0];
+            String value = (String) args[1];
+            if (setting == null)
+                break args;
+            else if (!serverClient.getPermissionLevel().equals(PermissionLevel.ADMIN)) {
+                log.addClient(GameColor.RED.getColorCode() + "[RandomTP] You need to be an Admin to do that!", serverClient);
+                return;
+            }
+            // Switch through all the setting options
+            switch (setting) {
+                case "confirmation":
+                    if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                        RandomTP.confirmation = Boolean.parseBoolean(value);
+                        log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Set " + setting + " to " + value, serverClient);
+                    } else {
+                        log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Only true/false values are allowed for changing " + setting + " .", serverClient);
+                    }
+                    return;
+                case "teleport_to_ocean":
+                    if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                        RandomTP.teleportToOcean = Boolean.parseBoolean(value);
+                        log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Set " + setting + " to " + value, serverClient);
+                    } else {
+                        log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Only true/false values are allowed for changing " + setting + " .", serverClient);
+                    }
+                    return;
+                case "permissionLevel":
+                    if (PermissionLevel.valueOf(value.toUpperCase()).name != null) {
+                        RandomTP.permissionLevel = value;
+                        log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Set " + setting + " to " + value, serverClient);
+                    } else {
+                        log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Valid options are USER, MODERATOR, ADMIN, OWNER, SERVER.", serverClient);
+                    }
+                    return;
+                case "cooldown":
+                    if (isInt(value)) {
+                        if (Integer.parseInt(value) >= 0) {
+                            RandomTP.cooldown = Integer.parseInt(value);
+                            log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Set " + setting + " to " + value, serverClient);
+                        } else {
+                            log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Cooldown cannot be set below 0.", serverClient);
+                        }
+                    } else {
+                        log.addClient(GameColor.RED.getColorCode() + "[RandomTP] " + value + " is not a valid number. Please put a number greater than 0.", serverClient);
+                    }
+                    return;
+                case "min_x":
+                    if (isInt(value)) {
+                        if (Integer.parseInt(value) > RandomTP.maxX) {
+                            log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Cannot set min_x greater than max_x (" + RandomTP.maxX + ").", serverClient);
+                        } else {
+                            RandomTP.minX = Integer.parseInt(value);
+                            log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Set " + setting + " to " + value, serverClient);
+                        }
+                    } else {
+                        log.addClient(GameColor.RED.getColorCode() + "[RandomTP] " + value + " is not a valid number.", serverClient);
+                    }
+                    return;
+                case "min_y":
+                    if (isInt(value)) {
+                        if (Integer.parseInt(value) > RandomTP.maxY) {
+                            log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Cannot set min_y greater than max_y (" + RandomTP.maxX + ").", serverClient);
+                        } else {
+                            RandomTP.minY = Integer.parseInt(value);
+                            log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Set " + setting + " to " + value, serverClient);
+                        }
+                    } else {
+                        log.addClient(GameColor.RED.getColorCode() + "[RandomTP] " + value + " is not a valid number.", serverClient);
+                    }
+                    return;
+                case "max_x":
+                    if (isInt(value)) {
+                        if (Integer.parseInt(value) < RandomTP.minX) {
+                            log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Cannot set max_x lower than min_x (" + RandomTP.maxX + ").", serverClient);
+                        } else {
+                            RandomTP.maxX = Integer.parseInt(value);
+                            log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Set " + setting + " to " + value, serverClient);
+                        }
+                    } else {
+                        log.addClient(GameColor.RED.getColorCode() + "[RandomTP] " + value + " is not a valid number.", serverClient);
+                    }
+                    return;
+                case "max_y":
+                    if (isInt(value)) {
+                        if (Integer.parseInt(value) < RandomTP.minY) {
+                            log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Cannot set max_y greater than min_y (" + RandomTP.maxX + ").", serverClient);
+                        } else {
+                            RandomTP.maxY = Integer.parseInt(value);
+                            log.addClient(GameColor.GREEN.getColorCode() + "[RandomTP] Set " + setting + " to " + value, serverClient);
+                        }
+                    } else {
+                        log.addClient(GameColor.RED.getColorCode() + "[RandomTP] " + value + " is not a valid number.", serverClient);
+                    }
+                    return;
+                default:
+                    log.addClient(GameColor.RED.getColorCode() + "[RandomTP] Valid settings to change are: confirmation, teleport_to_ocean, permissionLevel, cooldown, min_x, min_y, max_x, max_y.", serverClient);
+            }
+            return;
+        }
+        // If command is empty, then carry on
+        // If cooldown is enabled (greater than 0)
         if (RandomTP.cooldown > 0)
             if (cooldown.containsKey(serverClient.authentication)) {
                 // If current time is greater than last ran time + cooldown (default is 30)
@@ -52,17 +159,19 @@ public class RandomTPCommand extends ModularChatCommand {
                     return;
                 }
             }
+        // If confirmation is enabled
         if (RandomTP.confirmation)
+            // When player runs command, adds to confirmation list
             if (!confirmation.contains(serverClient.authentication)) {
                 confirmation.add(serverClient.authentication);
                 log.addClient(GameColor.RED.getColorCode() + Localization.translate("randomtp", "teleportConfirmation", "ocean",
                         RandomTP.teleportToOcean ? Localization.translate("randomtp", "oceanMessage") : ""), serverClient);
                 log.addClient(GameColor.PURPLE.getColorCode() + Localization.translate("randomtp", "teleportConfirmation2"), serverClient);
                 return;
+            } else {
+                // When player runs command again removes them from list then executes code as normal
+                confirmation.remove(serverClient.authentication);
             }
-        // When player runs command again removes them from list then executes code as normal
-        if (RandomTP.confirmation)
-            confirmation.remove(serverClient.authentication);
         // Random X & Y Level coords between -20000 and 20000 for each
         final int randomX = new Random().nextInt(RandomTP.minX, RandomTP.maxX);
         final int randomY = new Random().nextInt(RandomTP.minY, RandomTP.maxY);
@@ -81,5 +190,14 @@ public class RandomTPCommand extends ModularChatCommand {
         log.addClient(GameColor.GREEN.getColorCode() + Localization.translate("randomtp", "teleportMessage", "level", level.getIdentifier().stringID), serverClient);
         if (RandomTP.cooldown > 0)
             cooldown.put(serverClient.authentication, System.currentTimeMillis() + (1000L * RandomTP.cooldown));
+    }
+
+    private boolean isInt(String string) {
+        try {
+            Integer.parseInt(string);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
 }
