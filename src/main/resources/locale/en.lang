@@ -4,4 +4,4 @@ teleportCooldown=[RandomTP] You're on cooldown till the next teleport. You need 
 teleportConfirmation=[RandomTP] Confirmation Needed. You are about to randomly teleport to a different island. <ocean>
 teleportConfirmation2=[RandomTP] Type this command again to confirm.
 teleportMessage=[RandomTP] Teleported to <level>
-oceanMessage=You'll likely spawn in the ocean.Be sure to have a boat handy!
+oceanMessage=You'll likely spawn in the ocean. Be sure to have a boat handy!
