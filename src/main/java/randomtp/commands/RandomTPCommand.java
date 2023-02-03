@@ -172,7 +172,7 @@ public class RandomTPCommand extends ModularChatCommand {
                 // When player runs command again removes them from list then executes code as normal
                 confirmation.remove(serverClient.authentication);
             }
-        // Random X & Y Level coords between -20000 and 20000 for each
+        // Random X & Y Level coords between min & max for both x & y.
         final int randomX = new Random().nextInt(RandomTP.minX, RandomTP.maxX);
         final int randomY = new Random().nextInt(RandomTP.minY, RandomTP.maxY);
         // If level doesn't exist (probably won't) then generate the level
@@ -180,6 +180,8 @@ public class RandomTPCommand extends ModularChatCommand {
             server.world.generateNewLevel(randomX, randomY, 0);
         }
         final Level level = server.world.levelManager.getLevel(new LevelIdentifier(randomX, randomY, 0));
+        // Honestly don't know what this even checks really
+        // I saw it once and figured better safe than sorry, so I kept it.
         if (serverClient.getLevel().isServerLevel()) {
             LevelEvent e = new TeleportEvent(serverClient, 200, level.getIdentifier(), 10.0F, (newLevel) -> new TeleportResult(true,
                     RandomTP.teleportToOcean ? new Point(server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.x,
@@ -188,10 +190,12 @@ public class RandomTPCommand extends ModularChatCommand {
             serverClient.getLevel().entityManager.addLevelEventHidden(e);
         }
         log.addClient(GameColor.GREEN.getColorCode() + Localization.translate("randomtp", "teleportMessage", "level", level.getIdentifier().stringID), serverClient);
+        // If cooldown is enabled (greater than 0) then add them to cooldown list of current time + 1000ms * cooldown setting.
         if (RandomTP.cooldown > 0)
             cooldown.put(serverClient.authentication, System.currentTimeMillis() + (1000L * RandomTP.cooldown));
     }
 
+    // Cheeky way to check if string is an integer the safe way.
     private boolean isInt(String string) {
         try {
             Integer.parseInt(string);
