@@ -1,5 +1,5 @@
 [randomtp]
-commandDescription=Teleport to a Random Island
+commandDescription=Teleport to a random location
 teleportCooldown=[RandomTP] You're on cooldown till the next teleport. You need to wait <seconds> more seconds.
 teleportConfirmation=[RandomTP] Confirmation Needed. You are about to randomly teleport to a different island. <ocean>
 teleportConfirmation2=[RandomTP] Type this command again to confirm.

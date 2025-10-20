@@ -10,6 +10,7 @@ import necesse.engine.localization.Localization;
 import necesse.engine.network.client.Client;
 import necesse.engine.network.server.Server;
 import necesse.engine.network.server.ServerClient;
+import necesse.engine.util.GameRandom;
 import necesse.engine.util.LevelIdentifier;
 import necesse.engine.util.TeleportResult;
 import necesse.entity.levelEvent.LevelEvent;
@@ -18,9 +19,11 @@ import necesse.gfx.GameColor;
 import necesse.level.maps.Level;
 import randomtp.RandomTP;
 
-import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.function.Function;
 
 public class RandomTPCommand extends ModularChatCommand {
 
@@ -160,7 +163,7 @@ public class RandomTPCommand extends ModularChatCommand {
                 }
             }
         // If confirmation is enabled
-        if (RandomTP.confirmation)
+        if (RandomTP.confirmation) {
             // When player runs command, adds to confirmation list
             if (!confirmation.contains(serverClient.authentication)) {
                 confirmation.add(serverClient.authentication);
@@ -172,27 +175,32 @@ public class RandomTPCommand extends ModularChatCommand {
                 // When player runs command again removes them from list then executes code as normal
                 confirmation.remove(serverClient.authentication);
             }
-        // Random X & Y Level coords between min & max for both x & y.
-        final int randomX = new Random().nextInt(RandomTP.minX, RandomTP.maxX);
-        final int randomY = new Random().nextInt(RandomTP.minY, RandomTP.maxY);
-        // If level doesn't exist (probably won't) then generate the level
-        if (server.world.levelManager.getLevel(new LevelIdentifier(randomX, randomY, 0)) == null) {
-            server.world.generateNewLevel(randomX, randomY, 0);
         }
-        final Level level = server.world.levelManager.getLevel(new LevelIdentifier(randomX, randomY, 0));
-        // Honestly don't know what this even checks really
-        // I saw it once and figured better safe than sorry, so I kept it.
-        if (serverClient.getLevel().isServerLevel()) {
-            LevelEvent e = new TeleportEvent(serverClient, 200, level.getIdentifier(), 10.0F, (newLevel) -> new TeleportResult(true,
-                    RandomTP.teleportToOcean ? new Point(server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.x,
-                            server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.y) : new Point(server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.x * 32 + 16,
-                            server.world.levelManager.getLevel(newLevel.getIdentifier()).getWorldEntity().spawnTile.y * 32 + 16)));
-            serverClient.getLevel().entityManager.addLevelEventHidden(e);
-        }
+        final Level level = server.world.levelManager.getLevel(LevelIdentifier.SURFACE_IDENTIFIER);
+        LevelEvent e = getLevelEvent(serverClient, level);
+        level.entityManager.events.addHidden(e);
         log.addClient(GameColor.GREEN.getColorCode() + Localization.translate("randomtp", "teleportMessage", "level", level.getIdentifier().stringID), serverClient);
         // If cooldown is enabled (greater than 0) then add them to cooldown list of current time + 1000ms * cooldown setting.
         if (RandomTP.cooldown > 0)
             cooldown.put(serverClient.authentication, System.currentTimeMillis() + (1000L * RandomTP.cooldown));
+    }
+
+    private static LevelEvent getLevelEvent(ServerClient serverClient, Level level) {
+        Function<LevelIdentifier, Level> destinationGenerator = (id) -> level;
+
+        Function<Level, TeleportResult> destinationCheck = (level1) -> {
+            GameRandom random = new GameRandom();
+            int randomX, randomY;
+            do {
+                randomX = random.getIntBetween(RandomTP.minX, RandomTP.maxX);
+                randomY = random.getIntBetween(RandomTP.minY, RandomTP.maxY);
+            } while (level.isSolidTile(randomX, randomY) || level.isLiquidTile(randomX, randomY));
+
+            return new TeleportResult(true, randomX * 32 + 16, randomY * 32 + 16);
+        };
+
+        LevelEvent e = new TeleportEvent(serverClient, 0, level.getIdentifier(), 5, destinationGenerator, destinationCheck);
+        return e;
     }
 
     // Cheeky way to check if string is an integer the safe way.
