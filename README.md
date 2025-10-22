@@ -38,7 +38,8 @@ These values behave exactly like in the save file, except if you make a mistake 
 Valid settings include: confirmation, teleport_to_ocean, permissionLevel, cooldown, min_x, min_y, max_x, max_y.
 ```
 
-Interested in your own 24/7 Dedicated Necesse Server? Start one today! Use code FIRST50 at checkout for half off your first month.
+Interested in your own 24/7 Dedicated Necesse Server? Start one today! Use code **FIRST50** at checkout for half off your first month.
+
 [![](https://i.imgur.com/MC7itkR.png)](https://apexnode.host)
 
 Workshop Link: https://steamcommunity.com/sharedfiles/filedetails/?id=2924983797
