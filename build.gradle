@@ -7,7 +7,7 @@ plugins {
 
 project.ext.modID = "yovez.randomtp" // The unique id of your mod. Must be all lowercase and cannot use special characters.
 project.ext.modName = "RandomTP" // The display name of your mod.
-project.ext.modVersion = "2.0" // Your current builds version. Must follow the xx.xx... format.
+project.ext.modVersion = "2.1" // Your current builds version. Must follow the xx.xx... format.
 project.ext.gameVersion = "1.0.1" // The target game version.
 project.ext.modDescription = "Teleport to a random location. Mod is configurable with commands!" // Short description of what your mod is.
 project.ext.author = "Yovez" // Your name

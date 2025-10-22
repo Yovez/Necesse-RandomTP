@@ -191,16 +191,17 @@ public class RandomTPCommand extends ModularChatCommand {
         Function<Level, TeleportResult> destinationCheck = (level1) -> {
             GameRandom random = new GameRandom();
             int randomX, randomY;
+            // Find a random point between minX, maxX, minY, maxY
+            // Check if tile is solid, liquid, or protected, if yes to any then regenerate the randomX and randomY
             do {
                 randomX = random.getIntBetween(RandomTP.minX, RandomTP.maxX);
                 randomY = random.getIntBetween(RandomTP.minY, RandomTP.maxY);
-            } while (level.isSolidTile(randomX, randomY) || level.isLiquidTile(randomX, randomY));
+            } while (level.isSolidTile(randomX, randomY) || level.isLiquidTile(randomX, randomY) || level.isProtected(randomX, randomY));
 
             return new TeleportResult(true, randomX * 32 + 16, randomY * 32 + 16);
         };
 
-        LevelEvent e = new TeleportEvent(serverClient, 0, level.getIdentifier(), 5, destinationGenerator, destinationCheck);
-        return e;
+        return new TeleportEvent(serverClient, 0, level.getIdentifier(), 5, destinationGenerator, destinationCheck);
     }
 
     // Cheeky way to check if string is an integer the safe way.
